@@ -3,7 +3,9 @@ import RestaurantDataService from "../services/product";
 import { Link } from "react-router-dom";
 
 import BlueBerryImage from '../images/local-farms-organic-mixed-berries-frozen.jpg'
+import ReactPaginate from "react-paginate";
 
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
@@ -19,13 +21,27 @@ import { CardActionArea } from '@mui/material';
 import Rating from '@mui/material/Rating';
 import Stack from '@mui/material/Stack';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import Pagination from '@mui/material/Pagination';
 
 const RestaurantsList = props => {
   const [restaurants, setRestaurants] = useState([]);
   const [searchName, setSearchName ] = useState("");
-  const [searchZip, setSearchZip ] = useState("");
   const [searchCuisine, setSearchCuisine ] = useState("");
-  const [cuisines, setCuisines] = useState(["All Products"]);
+  const [cuisines, setCuisines] = useState(["All Cuisines"]);
+  const [value, setValue] = React.useState(3);
+  const [productsPerPage, setProductsPerPage] = useState();
+  const [productCount, setProductCount] = useState();
+  const [page, setPage] = React.useState(1);
+
+  // const handleChange = (event, value) => {
+  //   retrieveRestaurants(value);
+  // };
+
+  const changePage = ({ selected }) => {
+    retrieveRestaurants(selected);
+  };
+
+  const pageCount = Math.ceil(productCount / productsPerPage);
 
   useEffect(() => {
     retrieveRestaurants();
@@ -37,23 +53,19 @@ const RestaurantsList = props => {
     setSearchName(searchName);
   };
 
-  const onChangeSearchZip = e => {
-    const searchZip = e.target.value;
-    setSearchZip(searchZip);
-  };
-
   const onChangeSearchCuisine = e => {
     const searchCuisine = e.target.value;
     setSearchCuisine(searchCuisine);
     
   };
 
-  const retrieveRestaurants = () => {
-    RestaurantDataService.getAll()
+  const retrieveRestaurants = (pageNumber) => {
+    RestaurantDataService.getAll(pageNumber)
       .then(response => {
         console.log(response.data);
         setRestaurants(response.data.restaurants);
-        
+        setProductCount(response.data.total_restaurants);
+        setProductsPerPage(response.data.entries_per_page);
       })
       .catch(e => {
         console.log(e);
@@ -64,7 +76,7 @@ const RestaurantsList = props => {
     RestaurantDataService.getCuisines()
       .then(response => {
         console.log(response.data);
-        setCuisines(["All Products"].concat(response.data));
+        setCuisines(["All Cuisines"].concat(response.data));
         
       })
       .catch(e => {
@@ -91,10 +103,6 @@ const RestaurantsList = props => {
     find(searchName, "name")
   };
 
-  const findByZip = () => {
-    find(searchZip, "zipcode")
-  };
-
   const findByCuisine = () => {
     if (searchCuisine === "All Cuisines") {
       refreshList();
@@ -107,20 +115,27 @@ const RestaurantsList = props => {
     <div>
       <div className="row pb-1 mb-2 mt-4">
         <div className="input-group col-lg">
+        <Box
+          sx={{
+            '& > :not(style)': { m: 1, width: '40ch' },
+          }}
+        >
           <TextField
+            sx={{ mt: 1 }}
+            size="small"
             id="outlined-basic" 
             label="Product Name" 
             variant="outlined"
             type="text"
-            className="form-control"
             placeholder="Search by product name"
             value={searchName}
             onChange={onChangeSearchName}
           />
+        </Box>
           <div >
             <Button
-              sx={{ ml: 2 }}
-              style={{minWidth: '90px', minHeight: '55px'}}
+              sx={{ ml: 1, mt: 1 }}
+              style={{minHeight: '40px'}}
               variant="outlined"
               type="button"
               onClick={findByName}
@@ -129,35 +144,17 @@ const RestaurantsList = props => {
             </Button>
           </div>
         </div>
+        
         <div className="input-group col-lg">
-          <TextField
-            id="outlined-basic" 
-            label="Product Code" 
-            variant="outlined"
-            type="text"
-            className="form-control"
-            placeholder="Search by product code"
-            value={searchZip}
-            onChange={onChangeSearchZip}
-          />
-          <div className="input-group-append">
-            <Button
-              sx={{ ml: 2 }}
-              style={{minWidth: '90px', minHeight: '55px'}}
-              variant="outlined"
-              type="button"
-              onClick={findByZip}
-            >
-              Search
-            </Button>
-          </div>
-        </div>
-        <div className="input-group col-lg">
-        <FormControl sx={{ minWidth: 185 }}>
+        <FormControl sx={{ minWidth: 185, ml: -17 }}>
           <InputLabel id="demo-simple-select-autowidth-label">Available Products</InputLabel>
           <Select 
+            sx={{ mt: 1 }}
+            size="small"
             onChange={onChangeSearchCuisine}
             label="Available Products"
+            displayEmpty
+            inputProps={{ 'aria-label': 'Without label' }}
             autoWidth
           >
              {cuisines.map(cuisine => {
@@ -167,10 +164,10 @@ const RestaurantsList = props => {
              })}
           </Select>
         </FormControl>
-          <div className="input-group-append">
+          <div>
             <Button
-              sx={{ ml: 2, mb: 2 }}
-              style={{minWidth: '90px', minHeight: '55px'}}
+              sx={{ ml: 2, mt: 1 }}
+              style={{minHeight: '40px'}}
               variant="outlined"
               type="button"
               onClick={findByCuisine}
@@ -187,19 +184,7 @@ const RestaurantsList = props => {
             <div className="col-lg-4 pb-1">
               <div>
                 <div>
-                  {/* <h5 className="card-title">{restaurant.name}</h5>
-                  <p className="card-text">
-                    <strong>Cuisine: </strong>{restaurant.cuisine}<br/>
-                    <strong>Address: </strong>{address}
-                  </p>
-                  <div className="row">
-                    <button className="btn btn-primary col-lg-5 mx-1">View Bakery Item</button>
-                    <Link to={"/restaurants/"+restaurant._id} className="btn btn-primary col-lg-5 mx-1 ">
-                      View Reviews
-                    </Link>
-                  </div> */}
-
-                  <Card sx={{ maxWidth: 400, mb: 4 }}>
+                  <Card sx={{ maxWidth: 400, mb: 4, mt: 3 }}>
                     <Link to={"/restaurants/"+restaurant._id} style={{ textDecoration: 'none', color: '#000' }}>
                       <CardActionArea>
                           <CardMedia
@@ -213,10 +198,13 @@ const RestaurantsList = props => {
                               {restaurant.name}
                             </Typography>
                             <Stack spacing={1}>
-                              <Rating name="half-rating-read" defaultValue={2.5} precision={0.5} size="small" readOnly />
+                              <Rating name="read-only" size="small" value={value} readOnly />
                             </Stack>
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                              A discription of the bakery item
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 1 }}>
+                              A description of the bakery item
+                            </Typography>
+                            <Typography variant="body2"  sx={{ mb: 1 }} color="text.secondary">
+                              Cuisine: {restaurant.cuisine}
                             </Typography>
                           </CardContent>
                           </CardActionArea>
@@ -232,7 +220,28 @@ const RestaurantsList = props => {
             </div>
           );
         })}
+
+        <ReactPaginate
+          previousLabel={"Previous"}
+          nextLabel={"Next"}
+          pageCount={pageCount}
+          onPageChange={changePage}
+          containerClassName={"paginationBttns"}
+          previousLinkClassName={"previousBttn"}
+          nextLinkClassName={"nextBttn"}
+          disabledClassName={"paginationDisabled"}
+          activeClassName={"paginationActive"}
+        />
       </div>
+      <Stack spacing={2}>
+        {/* <Pagination count={10} page={page} onChange={handleChange}
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+          }} 
+          /> */}
+      </Stack>
     </div>
   );
 };

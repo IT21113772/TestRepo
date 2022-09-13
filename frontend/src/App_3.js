@@ -8,11 +8,14 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 
-import Login from "./searchAndReview/login";
-import AddReview from "./searchAndReview/add-review";
-import Restaurant from "./searchAndReview/products";
+import Login from "./components/login";
+import AddReview from "./components/add-review";
+import Restaurant from "./components/products";
+import RestaurantsList from "./components/products-list";
 
 export default function ButtonAppBar() {
 
@@ -26,11 +29,11 @@ export default function ButtonAppBar() {
     setUser(null)
   }
 
-//   const handleKeyPress = (event) => {
-//     if(event.key === 'Enter'){
-//         window.location.replace("/restaurants");
-//     }
-//   };
+  // const handleKeyPress = (event) => {
+  //   if(event.key === 'Enter'){
+  //       window.location.replace("/restaurants");
+  //   }
+  // };
 
   const history = useHistory();
   
@@ -41,28 +44,36 @@ export default function ButtonAppBar() {
 
   return (
     <div>
-      <Box sx={{ display: 'flex' }}>
-        <AppBar position="fixed">
+      <Box sx={{ flexGrow: 1 }}>
+        <AppBar position="static">
           <Toolbar>
-            <Link to='/' style={{textDecoration: 'none', color: 'inherit'}}>
-              <Typography
-                variant="h6"
-                noWrap
-                component="a"
-                // href="/"
-                sx={{
-                  mr: 2,
-                  display: { xs: 'none', md: 'flex' },
-                  fontFamily: 'monospace',
-                  fontWeight: 700,
-                  letterSpacing: '.3rem',
-                  color: 'inherit',
-                  textDecoration: 'none',
-                }}
-              >
-                Don&Sons
-              </Typography>
-            </Link>
+            <IconButton
+              size="large"
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+              sx={{ mr: 2 }}
+            >
+              <MenuIcon />
+            </IconButton>
+
+            <Typography
+              variant="h6"
+              noWrap
+              component="a"
+              href="/"
+              sx={{
+                mr: 2,
+                display: { xs: 'none', md: 'flex' },
+                fontFamily: 'monospace',
+                fontWeight: 700,
+                letterSpacing: '.3rem',
+                color: 'inherit',
+                textDecoration: 'none',
+              }}
+            >
+            Don&Sons
+          </Typography>
 
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
 
@@ -93,21 +104,20 @@ export default function ButtonAppBar() {
                 </Button> 
                 
               ) : (     
-                <Link to={"/login"} className="nav-link">
-                  <Button color="inherit">   
-                  Login (Dummy)
-                  </Button> 
-                </Link>
+                <Button color="inherit">      
+                  <Link to={"/login"} className="nav-link">
+                    Login (Dummy)
+                  </Link>
+              </Button> 
               )}
           </Toolbar>
         </AppBar>
-        <Toolbar />
       </Box>
 
     
       <div className="container mt-3">
         <Switch>
-          {/* <Route exact path={["/", "/restaurants"]} component={RestaurantsList} /> */}
+          <Route exact path={["/restaurants"]} component={RestaurantsList} />
           <Route 
             path="/restaurants/:id/review"
             render={(props) => (

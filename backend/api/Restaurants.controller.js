@@ -25,7 +25,7 @@ export default class RestaurantsController {
       page: page,
       filters: filters,
       entries_per_page: restaurantsPerPage,
-      total_results: totalNumRestaurants,
+      total_restaurants: totalNumRestaurants,
     }
     res.json(response)
   }

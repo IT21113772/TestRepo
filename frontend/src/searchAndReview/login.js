@@ -16,7 +16,8 @@ const Login = props => {
 
   const login = () => {
     props.login(user)
-    props.history.push('/');
+    // props.history.push('/');
+    props.history.goBack();
   }
 
   return (

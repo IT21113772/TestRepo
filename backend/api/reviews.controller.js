@@ -5,6 +5,7 @@ export default class ReviewsController {
     try {
       const restaurantId = req.body.restaurant_id
       const review = req.body.text
+      const rating = req.body.rating
       const userInfo = {
         name: req.body.name,
         _id: req.body.user_id
@@ -16,6 +17,7 @@ export default class ReviewsController {
         userInfo,
         review,
         date,
+        rating,
       )
       res.json({ status: "success" })
     } catch (e) {
@@ -28,12 +30,14 @@ export default class ReviewsController {
       const reviewId = req.body.review_id
       const text = req.body.text
       const date = new Date()
+      const rating = req.body.rating
 
       const reviewResponse = await ReviewsDAO.updateReview(
         reviewId,
         req.body.user_id,
         text,
         date,
+        rating,
       )
 
       var { error } = reviewResponse
